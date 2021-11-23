@@ -42,9 +42,7 @@ function check_input {
 
 
 # Main
-echo
 echo "OSSEC Configuration utility v0.1"
-echo
 
 echo "<ossec_config>" > ${OSSEC_CONF_FILE}.new
 
@@ -57,19 +55,11 @@ cp ${OSSEC_CONF_FILE} ${OSSEC_CONF_FILE}.bak
 
 # Ossec installed? 
 
-# server/agent/local or help
-check_input "1- What kind of installation do you want? (server, agent, local) [Default: server]:" "server|agent|local" "server"
-OSSEC_TYPE=$INPUTTEXT
-echo
+OSSEC_TYPE="server"
 
-echo "2- Setting up the configuration environment."
-echo
 
 # email notification
-echo "3- Configuring the OSSEC HIDS."
-echo
-check_input "  3.1- Do you want e-mail notification? (y/n) [Default: y]:" "y|n" "y"
-EMAIL_NOTIFICATION=$INPUTTEXT
+EMAIL_NOTIFICATION="n"
 
 echo "  <global>" >>  ${OSSEC_CONF_FILE}.new
 if [ "$EMAIL_NOTIFICATION" == "y" ]; then
@@ -97,25 +87,21 @@ echo "" >> ${OSSEC_CONF_FILE}.new
 # update the rules?
 cat $RULES_TEMPLATE >> ${OSSEC_CONF_FILE}.new
 echo "" >> ${OSSEC_CONF_FILE}.new
-echo
 
 
 
 # where is ossec
 
 # run integrity check daemon?
-check_input "  3.2- Do you want to run the integrity check daemon? (y/n) [y]:" "y|n" "y"
-INTEGRITY_CHECK=$INPUTTEXT
+INTEGRITY_CHECK="y"
 if [ "$INTEGRITY_CHECK" == "y" ]; then
   echo "" >> ${OSSEC_CONF_FILE}.new
   cat $SYSCHECK_TEMPLATE >> ${OSSEC_CONF_FILE}.new
   echo "" >> ${OSSEC_CONF_FILE}.new
 fi
-echo
 
 # run rootkit detection engine?
-check_input "  3.3- Do you want to run the rootkit detection engine? (y/n) [y]:" "y|n" "y" 
-ROOTCHECK=$INPUTTEXT
+ROOTCHECK="y"
 if [ "$ROOTCHECK" == "y" ]; then
   echo "" >> ${OSSEC_CONF_FILE}.new
   echo "  <rootcheck>" >> ${OSSEC_CONF_FILE}.new
@@ -132,20 +118,10 @@ else
   echo "    <disabled>yes</disabled>" >> ${OSSEC_CONF_FILE}.new
   echo "  </rootcheck>" >> ${OSSEC_CONF_FILE}.new
 fi
-echo
 
 
 # enable active response
-echo "  3.4- Active response allows you to execute a specific 
-       command based on the events received. For example,
-       you can block an IP address or disable access for
-       a specific user.  
-       More information at:
-       http://www.ossec.net/en/manual.html#active-response
-       
-"
-check_input "   - Do you want to enable active response? (y/n) [y]:" "y|n" "y"
-ACTIVE_RESPONSE=$INPUTTEXT
+ACTIVE_RESPONSE="n"
 if [ "$ACTIVE_RESPONSE" == "y" ]; then
   echo "     - Active response enabled.
    
@@ -187,11 +163,9 @@ if [ "$ACTIVE_RESPONSE" == "y" ]; then
   
 
 fi
-echo
 
 # enable remote syslog?
-check_input "  3.5- Do you want to enable remote syslog (port 514 udp)? (y/n) [y]:" "y|n" "y"
-if [ "$INPUTTEXT" == "y" ]; then
+if [ "y" == "y" ]; then
   echo "  <remote>"  >> ${OSSEC_CONF_FILE}.new
   echo "    <connection>syslog</connection>" >> ${OSSEC_CONF_FILE}.new
   echo "  </remote>" >> ${OSSEC_CONF_FILE}.new
@@ -231,12 +205,10 @@ fi
 
 # detect log files
 echo "" >> ${OSSEC_CONF_FILE}.new
-echo
 
 # Syslog
 for i in `cat $SYSLOG_TEMPLATE`; do
   if [ -f $i ] ; then
-    echo "    -- $i (syslog)"
     echo "" >> ${OSSEC_CONF_FILE}.new
     echo "  <localfile>" >> ${OSSEC_CONF_FILE}.new
     echo "    <log_format>syslog</log_format>" >> ${OSSEC_CONF_FILE}.new
@@ -257,10 +229,8 @@ for i in ${SNORT_FILES}; do
         head -n 1 $i|grep "\[**\] "|grep -v "Classification:" > /dev/null
         if [ $? = 0 ]; then
             echo "    <log_format>snort-full</log_format>" >> ${OSSEC_CONF_FILE}.new
-            echo "    -- $i (snort-full file)"
         else
             echo "    <log_format>snort-fast</log_format>" >> ${OSSEC_CONF_FILE}.new
-            echo "    -- $i (snort-fast file)"
         fi
         echo "    <location>$i</location>" >>${OSSEC_CONF_FILE}.new
         echo "  </localfile>" >> ${OSSEC_CONF_FILE}.new
@@ -278,7 +248,6 @@ for i in ${APACHE_FILES}; do
       echo "    <location>$i</location>" >>${OSSEC_CONF_FILE}.new
       echo "  </localfile>" >> ${OSSEC_CONF_FILE}.new
 
-      echo "    -- $i (apache log)"
     fi
 done
 
@@ -293,7 +262,6 @@ for i in ${PGSQL_FILES}; do
       echo "    <location>$i</location>" >>${OSSEC_CONF_FILE}.new
       echo "  </localfile>" >> ${OSSEC_CONF_FILE}.new
 
-      echo "    -- $i (postgresql log)"
     fi
 done
 
@@ -303,5 +271,4 @@ echo "</ossec_config>" >> ${OSSEC_CONF_FILE}.new
 mv ${OSSEC_CONF_FILE} ${OSSEC_CONF_FILE}.bak
 mv ${OSSEC_CONF_FILE}.new ${OSSEC_CONF_FILE}
 echo "Configuration complete."
-echo
 
