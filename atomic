@@ -1,4 +1,6 @@
 #!/bin/bash
+# Modified Atomic Archive configuration script; non-interactive
+
 # Name: Atomic Archive configuration script
 # Copyright Atomicorp, 2002-2018
 # License: AGPL
@@ -12,29 +14,6 @@ ATOMIC_VER="5.0.2"
 VERSION="1.0-21"
 SERVER=updates.atomicorp.com
 ARCH=`uname -i`
-
-
-# Input validation function 
-# check_input <msg> <valid responses regex> <default>
-# if <default> is passed on as null, then there is no default
-# Example: check_input  "Some question (yes/no) " "yes|no"  "yes"
-check_input () {
-  message=$1
-  validate=$2
-  default=$3
-
-  while [ $? -ne 1 ]; do
-    echo -n "$message "
-    read INPUTTEXT < /dev/tty
-    if [ "$INPUTTEXT" == "" -a "$default" != "" ]; then
-      INPUTTEXT=$default
-      return 1
-    fi
-    echo $INPUTTEXT | egrep -q "$validate" && return 1
-    echo "Invalid input"
-  done
-
-}
 
 
 echo
@@ -62,17 +41,6 @@ echo "For supported software packages please contact us at: "
 echo
 echo "  sales@atomicorp.com"
 echo
-
-if [ ! $NON_INT ]; then
-	check_input "Do you agree to these terms? (yes/no) [Default: yes]" "yes|no" "yes"
-	query=$INPUTTEXT
-fi
-
-if [ "$query" == "no" ]; then
-  echo "Exiting"
-  echo
-  exit 1
-fi
 
 
 echo
@@ -444,16 +412,6 @@ yum_install () {
 	if [ ! -f /etc/yum.repos.d/atomic.repo ]; then
 		echo "Error: /etc/yum.repos.d/atomic.repo was not detected."
 		exit 1
-	fi
-
-	if [ ! $NON_INT ]; then
-		echo
-		check_input "Enable repo by default? (yes/no) [Default: yes]:" "yes|no" "yes"
-		query=$INPUTTEXT
-		if [ "$query" == "no" ]; then
-			sed -i 's/enabled = 1/enabled = 0/' /etc/yum.repos.d/atomic.repo
-		fi
-
 	fi
 
 }
