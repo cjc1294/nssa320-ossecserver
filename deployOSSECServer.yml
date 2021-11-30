@@ -1,0 +1,23 @@
+ - name: Deploy OSSEC server
+   hosts: ossec-server
+   remote_user: root
+
+   tasks:
+    - name: Install Wget
+      yum:
+        name: wget
+        state: present
+
+    - name: Add Atomic repository
+      script: ./atomic
+
+    - name: Install OSSEC server
+      yum:
+        name: ossec-hids-server
+        state: latest
+
+    - name: Configure OSSEC
+      script: ./ossec-configure
+
+    - name: Start OSSEC
+      command: /var/ossec/bin/ossec-control start
